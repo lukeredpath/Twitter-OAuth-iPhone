@@ -23,8 +23,6 @@
 @class OAConsumer;
 
 @interface SA_OAuthTwitterEngine : MGTwitterEngine {
-	NSString	*_consumerSecret;
-	NSString	*_consumerKey;
 	NSURL		*_requestTokenURL;
 	NSURL		*_accessTokenURL;
 	NSURL		*_authorizeURL;
@@ -35,10 +33,8 @@
 @private
 	OAConsumer	*_consumer;
 	OAToken		*_requestToken;
-	OAToken		*_accessToken; 
 }
 
-@property (nonatomic, readwrite, retain) NSString *consumerSecret, *consumerKey;
 @property (nonatomic, readwrite, retain) NSURL *requestTokenURL, *accessTokenURL, *authorizeURL;				//you shouldn't need to touch these. Just in case...
 @property (nonatomic, readonly) BOOL OAuthSetup;
 

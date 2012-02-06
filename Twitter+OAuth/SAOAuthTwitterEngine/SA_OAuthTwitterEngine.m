@@ -40,7 +40,6 @@
 @implementation SA_OAuthTwitterEngine
 
 @synthesize pin = _pin, requestTokenURL = _requestTokenURL, accessTokenURL = _accessTokenURL, authorizeURL = _authorizeURL;
-@synthesize consumerSecret = _consumerSecret, consumerKey = _consumerKey;
 
 - (void) dealloc {
 	self.pin = nil;
@@ -267,7 +266,7 @@
 	// --------------------------------------------------------------------------------
 
     NSString *urlString = [NSString stringWithFormat:@"%@://%@/%@", 
-                           (_secureConnection) ? @"https" : @"http",
+                           @"https",
                            _APIDomain, fullPath];
     NSURL *finalURL = [NSURL URLWithString:urlString];
     if (!finalURL) {

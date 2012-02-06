@@ -97,11 +97,11 @@ static NSString* const kGGTwitterLoadingBackgroundImage = @"twitter_load.png";
 		_firstLoad = YES;
 		
 		if (UIInterfaceOrientationIsLandscape( self.orientation ) )
-			_webView = [[UIWebView alloc] initWithFrame: CGRectMake(0, 32, 480, 288)];
+			_webView = [[UIWebView alloc] initWithFrame: CGRectMake(0, 0, 480, 320)];
 		else
-			_webView = [[UIWebView alloc] initWithFrame: CGRectMake(0, 44, 320, 416)];
+			_webView = [[UIWebView alloc] initWithFrame: CGRectMake(0, 0, 320, 480)];
 		
-		_webView.alpha = 0.0;
+		_webView.alpha = 1.0;
 		_webView.delegate = self;
 		_webView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 		if ([_webView respondsToSelector: @selector(setDetectsPhoneNumbers:)]) [(id) _webView setDetectsPhoneNumbers: NO];
@@ -109,6 +109,7 @@ static NSString* const kGGTwitterLoadingBackgroundImage = @"twitter_load.png";
 		
 		NSURLRequest			*request = _engine.authorizeURLRequest;
 		[_webView loadRequest: request];
+		NSLog(@"loading request = %@", [[_engine.authorizeURLRequest URL] absoluteString]);
 
 		[[NSNotificationCenter defaultCenter] addObserver: self selector: @selector(pasteboardChanged:) name: UIPasteboardChangedNotification object: nil];
 	}
@@ -119,7 +120,6 @@ static NSString* const kGGTwitterLoadingBackgroundImage = @"twitter_load.png";
 #pragma mark Actions
 - (void) denied {
 	if ([_delegate respondsToSelector: @selector(OAuthTwitterControllerFailed:)]) [_delegate OAuthTwitterControllerFailed: self];
-	[self performSelector: @selector(dismissModalViewControllerAnimated:) withObject: (id) kCFBooleanTrue afterDelay: 1.0];
 }
 
 - (void) gotPin: (NSString *) pin {
@@ -127,12 +127,10 @@ static NSString* const kGGTwitterLoadingBackgroundImage = @"twitter_load.png";
 	[_engine requestAccessToken];
 	
 	if ([_delegate respondsToSelector: @selector(OAuthTwitterController:authenticatedWithUsername:)]) [_delegate OAuthTwitterController: self authenticatedWithUsername: _engine.username];
-	[self performSelector: @selector(dismissModalViewControllerAnimated:) withObject: (id) kCFBooleanTrue afterDelay: 1.0];
 }
 
 - (void) cancel: (id) sender {
 	if ([_delegate respondsToSelector: @selector(OAuthTwitterControllerCanceled:)]) [_delegate OAuthTwitterControllerCanceled: self];
-	[self performSelector: @selector(dismissModalViewControllerAnimated:) withObject: (id) kCFBooleanTrue afterDelay: 0.0];
 }
 
 //=============================================================================================================================
@@ -140,18 +138,16 @@ static NSString* const kGGTwitterLoadingBackgroundImage = @"twitter_load.png";
 - (void) loadView {
 	[super loadView];
 
-	_backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:kGGTwitterLoadingBackgroundImage]];
+//	_backgroundView = [[UIImageView alloc] initWithImage:[UIImage imageNamed:kGGTwitterLoadingBackgroundImage]];
+	_backgroundView = [[UIImageView alloc] initWithImage:nil];
 	if ( UIInterfaceOrientationIsLandscape( self.orientation ) ) {
 		self.view = [[[UIView alloc] initWithFrame: CGRectMake(0, 0, 480, 288)] autorelease];	
-		_backgroundView.frame =  CGRectMake(0, 44, 480, 288);
+		_backgroundView.frame =  CGRectMake(0, 0, 480, 288);
 		
-		_navBar = [[[UINavigationBar alloc] initWithFrame: CGRectMake(0, 0, 480, 32)] autorelease];
 	} else {
-		self.view = [[[UIView alloc] initWithFrame: CGRectMake(0, 0, 320, 460)] autorelease];	
-		_backgroundView.frame =  CGRectMake(0, 44, 320, 416);
-		_navBar = [[[UINavigationBar alloc] initWithFrame: CGRectMake(0, 0, 320, 44)] autorelease];
+		self.view = [[[UIView alloc] initWithFrame: CGRectMake(0, 0, 320, 416)] autorelease];	
+		_backgroundView.frame =  CGRectMake(0, 0, 320, 416);
 	}
-	_navBar.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleBottomMargin;
 	_backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 	self.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
 
@@ -182,11 +178,9 @@ static NSString* const kGGTwitterLoadingBackgroundImage = @"twitter_load.png";
 	[self.view addSubview: _blockerView];
 	[spinner startAnimating];
 	
-	UINavigationItem				*navItem = [[[UINavigationItem alloc] initWithTitle: NSLocalizedString(@"Twitter Info", nil)] autorelease];
-	navItem.leftBarButtonItem = [[[UIBarButtonItem alloc] initWithBarButtonSystemItem: UIBarButtonSystemItemCancel target: self action: @selector(cancel:)] autorelease];
-	
-	[_navBar pushNavigationItem: navItem animated: NO];
-	[self locateAuthPinInWebView: nil];
+    [self locateAuthPinInWebView: nil];
+
+	self.view.backgroundColor = [UIColor whiteColor];
 }
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
@@ -219,7 +213,7 @@ static NSString* const kGGTwitterLoadingBackgroundImage = @"twitter_load.png";
 	_loading = NO;
 	//[self performInjection];
 	if (_firstLoad) {
-		[_webView performSelector: @selector(stringByEvaluatingJavaScriptFromString:) withObject: @"window.scrollBy(0,200)" afterDelay: 0];
+//		[_webView performSelector: @selector(stringByEvaluatingJavaScriptFromString:) withObject: @"window.scrollBy(0,200)" afterDelay: 0];
 		_firstLoad = NO;
 	} else {
 		NSString					*authPin = [self locateAuthPinInWebView: webView];
@@ -243,7 +237,7 @@ static NSString* const kGGTwitterLoadingBackgroundImage = @"twitter_load.png";
 	[UIView commitAnimations];
 	
 	if ([_webView isLoading]) {
-		_webView.alpha = 0.0;
+		_webView.alpha = 1.0;
 	} else {
 		_webView.alpha = 1.0;
 	}
@@ -345,7 +339,7 @@ Ugly. I apologize for its inelegance. Bleah.
 		[self denied];
 		return NO;
 	}
-	if (navigationType != UIWebViewNavigationTypeOther) _webView.alpha = 0.1;
+	if (navigationType != UIWebViewNavigationTypeOther) _webView.alpha = 1.0;
 	return YES;
 }
 
