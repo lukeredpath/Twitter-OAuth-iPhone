@@ -16,7 +16,7 @@
 
 @interface MGTwitterEngine : NSObject <MGTwitterParserDelegate>
 {
-    __weak NSObject <MGTwitterEngineDelegate> *_delegate;
+    __unsafe__unretained NSObject <MGTwitterEngineDelegate> *_delegate;
     NSMutableDictionary *_connections;   // MGTwitterHTTPURLConnection objects
     NSString *_clientName;
     NSString *_clientVersion;
